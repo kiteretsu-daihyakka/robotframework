@@ -1,5 +1,45 @@
 {
-  "$ref": "#/definitions/TestSuite",
+  "title": "Result",
+  "description": "Schema for JSON output files.\n\n`robot.result.TestSuite` has a separate schema that can be used when not\nworking with the full result model.\n\nCompatible with JSON Schema Draft 2020-12.",
+  "type": "object",
+  "properties": {
+    "generated": {
+      "title": "Generated",
+      "type": "string",
+      "format": "date-time"
+    },
+    "generator": {
+      "title": "Generator",
+      "type": "string"
+    },
+    "rpa": {
+      "title": "Rpa",
+      "type": "boolean"
+    },
+    "suite": {
+      "$ref": "#/definitions/TestSuite"
+    },
+    "statistics": {
+      "$ref": "#/definitions/Statistics"
+    },
+    "errors": {
+      "title": "Errors",
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/ErrorMessage"
+      }
+    }
+  },
+  "required": [
+    "generated",
+    "generator",
+    "rpa",
+    "suite",
+    "statistics",
+    "errors"
+  ],
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "definitions": {
     "Message": {
       "title": "Message",
@@ -28,7 +68,8 @@
         },
         "timestamp": {
           "title": "Timestamp",
-          "type": "string"
+          "type": "string",
+          "format": "date-time"
         },
         "type": {
           "title": "Type",
@@ -39,8 +80,7 @@
       },
       "required": [
         "message",
-        "level",
-        "html"
+        "level"
       ],
       "additionalProperties": false
     },
@@ -58,7 +98,8 @@
         },
         "start_time": {
           "title": "Start Time",
-          "type": "string"
+          "type": "string",
+          "format": "date-time"
         },
         "message": {
           "title": "Message",
@@ -126,7 +167,8 @@
         },
         "start_time": {
           "title": "Start Time",
-          "type": "string"
+          "type": "string",
+          "format": "date-time"
         },
         "message": {
           "title": "Message",
@@ -173,7 +215,8 @@
         },
         "start_time": {
           "title": "Start Time",
-          "type": "string"
+          "type": "string",
+          "format": "date-time"
         },
         "message": {
           "title": "Message",
@@ -220,7 +263,8 @@
         },
         "start_time": {
           "title": "Start Time",
-          "type": "string"
+          "type": "string",
+          "format": "date-time"
         },
         "message": {
           "title": "Message",
@@ -274,7 +318,8 @@
         },
         "start_time": {
           "title": "Start Time",
-          "type": "string"
+          "type": "string",
+          "format": "date-time"
         },
         "message": {
           "title": "Message",
@@ -329,7 +374,8 @@
         },
         "start_time": {
           "title": "Start Time",
-          "type": "string"
+          "type": "string",
+          "format": "date-time"
         },
         "message": {
           "title": "Message",
@@ -424,7 +470,8 @@
         },
         "start_time": {
           "title": "Start Time",
-          "type": "string"
+          "type": "string",
+          "format": "date-time"
         },
         "message": {
           "title": "Message",
@@ -434,7 +481,44 @@
           "title": "Body",
           "type": "array",
           "items": {
-            "$ref": "#/definitions/TryBranch"
+            "anyOf": [
+              {
+                "$ref": "#/definitions/TryBranch"
+              },
+              {
+                "$ref": "#/definitions/Keyword"
+              },
+              {
+                "$ref": "#/definitions/For"
+              },
+              {
+                "$ref": "#/definitions/While"
+              },
+              {
+                "$ref": "#/definitions/If"
+              },
+              {
+                "$ref": "#/definitions/Try"
+              },
+              {
+                "$ref": "#/definitions/Var"
+              },
+              {
+                "$ref": "#/definitions/Break"
+              },
+              {
+                "$ref": "#/definitions/Continue"
+              },
+              {
+                "$ref": "#/definitions/Return"
+              },
+              {
+                "$ref": "#/definitions/Error"
+              },
+              {
+                "$ref": "#/definitions/Message"
+              }
+            ]
           }
         },
         "type": {
@@ -465,7 +549,8 @@
         },
         "start_time": {
           "title": "Start Time",
-          "type": "string"
+          "type": "string",
+          "format": "date-time"
         },
         "message": {
           "title": "Message",
@@ -548,7 +633,8 @@
         },
         "start_time": {
           "title": "Start Time",
-          "type": "string"
+          "type": "string",
+          "format": "date-time"
         },
         "message": {
           "title": "Message",
@@ -558,7 +644,44 @@
           "title": "Body",
           "type": "array",
           "items": {
-            "$ref": "#/definitions/IfBranch"
+            "anyOf": [
+              {
+                "$ref": "#/definitions/IfBranch"
+              },
+              {
+                "$ref": "#/definitions/Keyword"
+              },
+              {
+                "$ref": "#/definitions/For"
+              },
+              {
+                "$ref": "#/definitions/While"
+              },
+              {
+                "$ref": "#/definitions/If"
+              },
+              {
+                "$ref": "#/definitions/Try"
+              },
+              {
+                "$ref": "#/definitions/Var"
+              },
+              {
+                "$ref": "#/definitions/Break"
+              },
+              {
+                "$ref": "#/definitions/Continue"
+              },
+              {
+                "$ref": "#/definitions/Return"
+              },
+              {
+                "$ref": "#/definitions/Error"
+              },
+              {
+                "$ref": "#/definitions/Message"
+              }
+            ]
           }
         },
         "type": {
@@ -589,7 +712,8 @@
         },
         "start_time": {
           "title": "Start Time",
-          "type": "string"
+          "type": "string",
+          "format": "date-time"
         },
         "message": {
           "title": "Message",
@@ -664,7 +788,8 @@
         },
         "start_time": {
           "title": "Start Time",
-          "type": "string"
+          "type": "string",
+          "format": "date-time"
         },
         "message": {
           "title": "Message",
@@ -758,7 +883,8 @@
         },
         "start_time": {
           "title": "Start Time",
-          "type": "string"
+          "type": "string",
+          "format": "date-time"
         },
         "message": {
           "title": "Message",
@@ -841,7 +967,8 @@
         },
         "start_time": {
           "title": "Start Time",
-          "type": "string"
+          "type": "string",
+          "format": "date-time"
         },
         "message": {
           "title": "Message",
@@ -952,7 +1079,8 @@
         },
         "start_time": {
           "title": "Start Time",
-          "type": "string"
+          "type": "string",
+          "format": "date-time"
         },
         "message": {
           "title": "Message",
@@ -1068,7 +1196,8 @@
         },
         "start_time": {
           "title": "Start Time",
-          "type": "string"
+          "type": "string",
+          "format": "date-time"
         },
         "message": {
           "title": "Message",
@@ -1154,7 +1283,6 @@
     },
     "TestSuite": {
       "title": "TestSuite",
-      "description": "JSON schema for `robot.running.TestSuite`.\n\nCompatible with JSON Schema Draft 2020-12.",
       "type": "object",
       "properties": {
         "elapsed_time": {
@@ -1167,7 +1295,8 @@
         },
         "start_time": {
           "title": "Start Time",
-          "type": "string"
+          "type": "string",
+          "format": "date-time"
         },
         "message": {
           "title": "Message",
@@ -1223,8 +1352,181 @@
         "status",
         "name"
       ],
-      "additionalProperties": false,
-      "$schema": "https://json-schema.org/draft/2020-12/schema"
+      "additionalProperties": false
+    },
+    "Stat": {
+      "title": "Stat",
+      "type": "object",
+      "properties": {
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "pass": {
+          "title": "Pass",
+          "type": "integer"
+        },
+        "fail": {
+          "title": "Fail",
+          "type": "integer"
+        },
+        "skip": {
+          "title": "Skip",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "label",
+        "pass",
+        "fail",
+        "skip"
+      ],
+      "additionalProperties": false
+    },
+    "SuiteStat": {
+      "title": "SuiteStat",
+      "type": "object",
+      "properties": {
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "pass": {
+          "title": "Pass",
+          "type": "integer"
+        },
+        "fail": {
+          "title": "Fail",
+          "type": "integer"
+        },
+        "skip": {
+          "title": "Skip",
+          "type": "integer"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "label",
+        "pass",
+        "fail",
+        "skip",
+        "name",
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "TagStat": {
+      "title": "TagStat",
+      "type": "object",
+      "properties": {
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "pass": {
+          "title": "Pass",
+          "type": "integer"
+        },
+        "fail": {
+          "title": "Fail",
+          "type": "integer"
+        },
+        "skip": {
+          "title": "Skip",
+          "type": "integer"
+        },
+        "doc": {
+          "title": "Doc",
+          "type": "string"
+        },
+        "combined": {
+          "title": "Combined",
+          "type": "string"
+        },
+        "info": {
+          "title": "Info",
+          "type": "string"
+        },
+        "links": {
+          "title": "Links",
+          "type": "string"
+        }
+      },
+      "required": [
+        "label",
+        "pass",
+        "fail",
+        "skip"
+      ],
+      "additionalProperties": false
+    },
+    "Statistics": {
+      "title": "Statistics",
+      "type": "object",
+      "properties": {
+        "total": {
+          "$ref": "#/definitions/Stat"
+        },
+        "suites": {
+          "title": "Suites",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SuiteStat"
+          }
+        },
+        "tags": {
+          "title": "Tags",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/TagStat"
+          }
+        }
+      },
+      "required": [
+        "total",
+        "suites",
+        "tags"
+      ],
+      "additionalProperties": false
+    },
+    "ErrorMessage": {
+      "title": "ErrorMessage",
+      "type": "object",
+      "properties": {
+        "message": {
+          "title": "Message",
+          "type": "string"
+        },
+        "level": {
+          "title": "Level",
+          "enum": [
+            "ERROR",
+            "WARN"
+          ],
+          "type": "string"
+        },
+        "html": {
+          "title": "Html",
+          "type": "boolean"
+        },
+        "timestamp": {
+          "title": "Timestamp",
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "message",
+        "level"
+      ],
+      "additionalProperties": false
     }
   }
 }

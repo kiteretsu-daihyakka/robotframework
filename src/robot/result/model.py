@@ -43,7 +43,7 @@ from typing import Literal, Mapping, overload, Sequence, Union, TextIO, TypeVar
 from robot import model
 from robot.model import (BodyItem, create_fixture, DataDict, Tags, TestSuites,
                          TotalStatistics, TotalStatisticsBuilder)
-from robot.utils import is_dict_like, is_list_like, setter
+from robot.utils import setter
 
 from .configurer import SuiteConfigurer
 from .messagefilter import MessageFilter
@@ -80,14 +80,8 @@ class Message(model.Message):
     __slots__ = ()
 
     def to_dict(self) -> DataDict:
-        data: DataDict = {
-            'type': self.type,
-            'message': self.message,
-            'level': self.level,
-            'html': self.html,
-        }
-        if self.timestamp:
-            data['timestamp'] = self.timestamp.isoformat()
+        data = super().to_dict()
+        data['type'] = self.type
         return data
 
 
@@ -710,7 +704,7 @@ class Keyword(model.Keyword, StatusMixin):
                  owner: 'str|None' = None,
                  source_name: 'str|None' = None,
                  doc: str = '',
-                 args: model.Arguments = (),
+                 args: Sequence[str] = (),
                  assign: Sequence[str] = (),
                  tags: Sequence[str] = (),
                  timeout: 'str|None' = None,
@@ -737,30 +731,6 @@ class Keyword(model.Keyword, StatusMixin):
         self._setup = None
         self._teardown = None
         self.body = ()
-
-    @setter
-    def args(self, args: model.Arguments) -> 'tuple[str, ...]':
-        """Keyword arguments.
-
-        Arguments originating from normal data are given as a list of strings.
-        Programmatically it is possible to use also other types and named arguments
-        can be specified using name-value tuples. Additionally, it is possible
-        o give arguments directly as a list of positional arguments and a dictionary
-        of named arguments. In all these cases arguments are stored as strings.
-        """
-        if len(args) == 2 and is_list_like(args[0]) and is_dict_like(args[1]):
-            positional = [str(a) for a in args[0]]
-            named = [f'{n}={v}' for n, v in args[1].items()]
-            return tuple(positional + named)
-        return tuple([a if isinstance(a, str) else self._arg_to_str(a) for a in args])
-
-    def _arg_to_str(self, arg):
-        if isinstance(arg, tuple):
-            if len(arg) == 2:
-                return f'{arg[0]}={arg[1]}'
-            if len(arg) == 1:
-                return str(arg[0])
-        return str(arg)
 
     @setter
     def body(self, body: 'Sequence[BodyItem|DataDict]') -> Body:
@@ -1115,6 +1085,42 @@ class TestSuite(model.TestSuite[Keyword, TestCase], StatusMixin):
     def to_dict(self) -> DataDict:
         return {**super().to_dict(), **StatusMixin.to_dict(self)}
 
+    @classmethod
+    def from_dict(cls, data: DataDict) -> 'TestSuite':
+        """Create suite based on result data in a dictionary.
+
+        ``data`` can either contain only the suite data got, for example, from
+        the :meth:`to_dict` method, or it can contain full result data with
+        execution errors and other such information in addition to the suite data.
+        In the latter case only the suite data is used, though.
+
+        Support for full result data is new in Robot Framework 7.2.
+        """
+        if 'suite' in data:
+            data = data['suite']
+        return super().from_dict(data)
+
+    @classmethod
+    def from_json(cls, source: 'str|bytes|TextIO|Path') -> 'TestSuite':
+        """Create suite based on results in JSON.
+
+        The data is given as the ``source`` parameter. It can be:
+
+        - a string containing the data directly,
+        - an open file object where to read the data from, or
+        - a path (``pathlib.Path`` or string) to a UTF-8 encoded file to read.
+
+        Supports JSON produced by :meth:`to_json` that contains only the suite
+        information, as well as full result JSON that contains also execution
+        errors and other information. In the latter case errors and all other
+        information is silently ignored, though. If that is a problem,
+        :class:`~robot.result.resultbuilder.ExecutionResult` should be used
+        instead.
+
+        Support for full result JSON is new in Robot Framework 7.2.
+        """
+        return super().from_json(source)
+
     @overload
     def to_xml(self, file: None = None) -> str:
         ...
@@ -1157,7 +1163,7 @@ class TestSuite(model.TestSuite[Keyword, TestCase], StatusMixin):
         if output is None:
             output = StringIO()
         elif isinstance(output, (Path, str)):
-            output = open(output, 'w')
+            output = open(output, 'w', encoding='UTF-8')
             close = True
         return output, close
 

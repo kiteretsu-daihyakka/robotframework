@@ -27,12 +27,17 @@ from .loggerhelper import IsLogged
 from .logger import LOGGER
 
 
-class Listeners(LoggerApi):
+class Listeners:
     _listeners: 'list[ListenerFacade]'
 
     def __init__(self, listeners=(), log_level='INFO'):
         self._is_logged = IsLogged(log_level)
         self._listeners = self._import_listeners(listeners)
+
+    # Must be property to allow LibraryListeners to override it.
+    @property
+    def listeners(self):
+        return self._listeners
 
     def _import_listeners(self, listeners, library=None) -> 'list[ListenerFacade]':
         imported = []
@@ -62,8 +67,8 @@ class Listeners(LoggerApi):
             # Modules have `__name__`, with others better to use `type_name`.
             name = getattr(listener, '__name__', None) or type_name(listener)
         if self._get_version(listener) == 2:
-            return ListenerV2Facade(listener, name, library)
-        return ListenerV3Facade(listener, name, library)
+            return ListenerV2Facade(listener, name, self._is_logged, library)
+        return ListenerV3Facade(listener, name, self._is_logged, library)
 
     def _get_version(self, listener):
         version = getattr(listener, 'ROBOT_LISTENER_API_VERSION', 3)
@@ -75,205 +80,14 @@ class Listeners(LoggerApi):
             raise DataError(f"Unsupported API version '{version}'.")
         return version
 
-    # Must be property to allow LibraryListeners to override it.
-    @property
-    def listeners(self):
-        return self._listeners
-
-    def start_suite(self, data, result):
-        for listener in self.listeners:
-            listener.start_suite(data, result)
-
-    def end_suite(self, data, result):
-        for listener in self.listeners:
-            listener.end_suite(data, result)
-
-    def start_test(self, data, result):
-        for listener in self.listeners:
-            listener.start_test(data, result)
-
-    def end_test(self, data, result):
-        for listener in self.listeners:
-            listener.end_test(data, result)
-
-    def start_keyword(self, data, result):
-        for listener in self.listeners:
-            listener.start_keyword(data, result)
-
-    def end_keyword(self, data, result):
-        for listener in self.listeners:
-            listener.end_keyword(data, result)
-
-    def start_user_keyword(self, data, implementation, result):
-        for listener in self.listeners:
-            listener.start_user_keyword(data, implementation, result)
-
-    def end_user_keyword(self, data, implementation, result):
-        for listener in self.listeners:
-            listener.end_user_keyword(data, implementation, result)
-
-    def start_library_keyword(self, data, implementation, result):
-        for listener in self.listeners:
-            listener.start_library_keyword(data, implementation, result)
-
-    def end_library_keyword(self, data, implementation, result):
-        for listener in self.listeners:
-            listener.end_library_keyword(data, implementation, result)
-
-    def start_invalid_keyword(self, data, implementation, result):
-        for listener in self.listeners:
-            listener.start_invalid_keyword(data, implementation, result)
-
-    def end_invalid_keyword(self, data, implementation, result):
-        for listener in self.listeners:
-            listener.end_invalid_keyword(data, implementation, result)
-
-    def start_for(self, data, result):
-        for listener in self.listeners:
-            listener.start_for(data, result)
-
-    def end_for(self, data, result):
-        for listener in self.listeners:
-            listener.end_for(data, result)
-
-    def start_for_iteration(self, data, result):
-        for listener in self.listeners:
-            listener.start_for_iteration(data, result)
-
-    def end_for_iteration(self, data, result):
-        for listener in self.listeners:
-            listener.end_for_iteration(data, result)
-
-    def start_while(self, data, result):
-        for listener in self.listeners:
-            listener.start_while(data, result)
-
-    def end_while(self, data, result):
-        for listener in self.listeners:
-            listener.end_while(data, result)
-
-    def start_while_iteration(self, data, result):
-        for listener in self.listeners:
-            listener.start_while_iteration(data, result)
-
-    def end_while_iteration(self, data, result):
-        for listener in self.listeners:
-            listener.end_while_iteration(data, result)
-
-    def start_if(self, data, result):
-        for listener in self.listeners:
-            listener.start_if(data, result)
-
-    def end_if(self, data, result):
-        for listener in self.listeners:
-            listener.end_if(data, result)
-
-    def start_if_branch(self, data, result):
-        for listener in self.listeners:
-            listener.start_if_branch(data, result)
-
-    def end_if_branch(self, data, result):
-        for listener in self.listeners:
-            listener.end_if_branch(data, result)
-
-    def start_try(self, data, result):
-        for listener in self.listeners:
-            listener.start_try(data, result)
-
-    def end_try(self, data, result):
-        for listener in self.listeners:
-            listener.end_try(data, result)
-
-    def start_try_branch(self, data, result):
-        for listener in self.listeners:
-            listener.start_try_branch(data, result)
-
-    def end_try_branch(self, data, result):
-        for listener in self.listeners:
-            listener.end_try_branch(data, result)
-
-    def start_return(self, data, result):
-        for listener in self.listeners:
-            listener.start_return(data, result)
-
-    def end_return(self, data, result):
-        for listener in self.listeners:
-            listener.end_return(data, result)
-
-    def start_continue(self, data, result):
-        for listener in self.listeners:
-            listener.start_continue(data, result)
-
-    def end_continue(self, data, result):
-        for listener in self.listeners:
-            listener.end_continue(data, result)
-
-    def start_break(self, data, result):
-        for listener in self.listeners:
-            listener.start_break(data, result)
-
-    def end_break(self, data, result):
-        for listener in self.listeners:
-            listener.end_break(data, result)
-
-    def start_error(self, data, result):
-        for listener in self.listeners:
-            listener.start_error(data, result)
-
-    def end_error(self, data, result):
-        for listener in self.listeners:
-            listener.end_error(data, result)
-
-    def start_var(self, data, result):
-        for listener in self.listeners:
-            listener.start_var(data, result)
-
-    def end_var(self, data, result):
-        for listener in self.listeners:
-            listener.end_var(data, result)
-
     def set_log_level(self, level):
         self._is_logged.set_level(level)
 
-    def log_message(self, message):
-        if self._is_logged(message.level):
-            for listener in self.listeners:
-                listener.log_message(message)
+    def __iter__(self):
+        return iter(self.listeners)
 
-    def message(self, message):
-        for listener in self.listeners:
-            listener.message(message)
-
-    def imported(self, import_type, name, attrs):
-        for listener in self.listeners:
-            listener.imported(import_type, name, attrs)
-
-    def output_file(self, path):
-        for listener in self.listeners:
-            listener.output_file(path)
-
-    def report_file(self, path):
-        for listener in self.listeners:
-            listener.report_file(path)
-
-    def log_file(self, path):
-        for listener in self.listeners:
-            listener.log_file(path)
-
-    def xunit_file(self, path):
-        for listener in self.listeners:
-            listener.xunit_file(path)
-
-    def debug_file(self, path):
-        for listener in self.listeners:
-            listener.debug_file(path)
-
-    def close(self):
-        for listener in self.listeners:
-            listener.close()
-
-    def __bool__(self):
-        return bool(self.listeners)
+    def __len__(self):
+        return len(self.listeners)
 
 
 class LibraryListeners(Listeners):
@@ -296,9 +110,6 @@ class LibraryListeners(Listeners):
         listeners = self._import_listeners(library.listeners, library=library)
         self._listeners[-1].extend(listeners)
 
-    def close(self):
-        pass
-
     def unregister(self, library, close=False):
         remaining = []
         for listener in self._listeners[-1]:
@@ -311,17 +122,26 @@ class LibraryListeners(Listeners):
 
 class ListenerFacade(LoggerApi, ABC):
 
-    def __init__(self, listener, name, library=None):
+    def __init__(self, listener, name, is_logged, library=None):
         self.listener = listener
         self.name = name
+        self._is_logged = is_logged
         self.library = library
+        self.priority = self._get_priority(listener)
+
+    def _get_priority(self, listener):
+        priority = getattr(listener, 'ROBOT_LISTENER_PRIORITY', 0)
+        try:
+            return float(priority)
+        except (ValueError, TypeError):
+            raise DataError(f"Invalid listener priority '{priority}'.")
 
     def _get_method(self, name, fallback=None):
         for method_name in self._get_method_names(name):
             method = getattr(self.listener, method_name, None)
             if method:
                 return ListenerMethod(method, self.name)
-        return ListenerMethod(None, self.name) if fallback is None else fallback
+        return fallback or ListenerMethod(None, self.name)
 
     def _get_method_names(self, name):
         names = [name, self._to_camelCase(name)] if '_' in name else [name]
@@ -336,8 +156,8 @@ class ListenerFacade(LoggerApi, ABC):
 
 class ListenerV3Facade(ListenerFacade):
 
-    def __init__(self, listener, name, library=None):
-        super().__init__(listener, name, library)
+    def __init__(self, listener, name, is_logged, library=None):
+        super().__init__(listener, name, is_logged, library)
         get = self._get_method
         # Suite
         self.start_suite = get('start_suite')
@@ -346,8 +166,8 @@ class ListenerV3Facade(ListenerFacade):
         self.start_test = get('start_test')
         self.end_test = get('end_test')
         # Fallbacks for body items
-        start_body_item = self._get_method('start_body_item')
-        end_body_item = self._get_method('end_body_item')
+        start_body_item = get('start_body_item')
+        end_body_item = get('end_body_item')
         # Keywords
         self.start_keyword = get('start_keyword', start_body_item)
         self.end_keyword = get('end_keyword', end_body_item)
@@ -393,14 +213,18 @@ class ListenerV3Facade(ListenerFacade):
         self.start_error = get('start_error', start_body_item)
         self.end_error = get('end_error', end_body_item)
         # Messages
-        self.log_message = get('log_message')
+        self._log_message = get('log_message')
         self.message = get('message')
+        # Imports
+        self.library_import = get('library_import')
+        self.resource_import = get('resource_import')
+        self.variables_import = get('variables_import')
         # Result files
-        self.output_file = self._get_method('output_file')
-        self.report_file = self._get_method('report_file')
-        self.log_file = self._get_method('log_file')
-        self.xunit_file = self._get_method('xunit_file')
-        self.debug_file = self._get_method('debug_file')
+        self.output_file = get('output_file')
+        self.report_file = get('report_file')
+        self.log_file = get('log_file')
+        self.xunit_file = get('xunit_file')
+        self.debug_file = get('debug_file')
         # Close
         self.close = get('close')
 
@@ -440,35 +264,40 @@ class ListenerV3Facade(ListenerFacade):
         else:
             self.end_keyword(data, result)
 
+    def log_message(self, message):
+        if self._is_logged(message.level):
+            self._log_message(message)
+
 
 class ListenerV2Facade(ListenerFacade):
 
-    def __init__(self, listener, name, library=None):
-        super().__init__(listener, name, library)
+    def __init__(self, listener, name, is_logged, library=None):
+        super().__init__(listener, name, is_logged, library)
+        get = self._get_method
         # Suite
-        self._start_suite = self._get_method('start_suite')
-        self._end_suite = self._get_method('end_suite')
+        self._start_suite = get('start_suite')
+        self._end_suite = get('end_suite')
         # Test
-        self._start_test = self._get_method('start_test')
-        self._end_test = self._get_method('end_test')
+        self._start_test = get('start_test')
+        self._end_test = get('end_test')
         # Keyword and control structures
-        self._start_kw = self._get_method('start_keyword')
-        self._end_kw = self._get_method('end_keyword')
+        self._start_kw = get('start_keyword')
+        self._end_kw = get('end_keyword')
         # Messages
-        self._log_message = self._get_method('log_message')
-        self._message = self._get_method('message')
+        self._log_message = get('log_message')
+        self._message = get('message')
+        # Imports
+        self._library_import = get('library_import')
+        self._resource_import = get('resource_import')
+        self._variables_import = get('variables_import')
         # Result files
-        self._output_file = self._get_method('output_file')
-        self._report_file = self._get_method('report_file')
-        self._log_file = self._get_method('log_file')
-        self._xunit_file = self._get_method('xunit_file')
-        self._debug_file = self._get_method('debug_file')
+        self._output_file = get('output_file')
+        self._report_file = get('report_file')
+        self._log_file = get('log_file')
+        self._xunit_file = get('xunit_file')
+        self._debug_file = get('debug_file')
         # Close
-        self._close = self._get_method('close')
-
-    def imported(self, import_type: str, name: str, attrs):
-        method = self._get_method(f'{import_type.lower()}_import')
-        method(name, attrs)
+        self._close = get('close')
 
     def start_suite(self, data, result):
         self._start_suite(result.name, self._suite_attrs(data, result))
@@ -602,10 +431,26 @@ class ListenerV2Facade(ListenerFacade):
         return {'name': result.name, 'value': value, 'scope': result.scope or 'LOCAL'}
 
     def log_message(self, message):
-        self._log_message(self._message_attributes(message))
+        if self._is_logged(message.level):
+            self._log_message(self._message_attributes(message))
 
     def message(self, message):
         self._message(self._message_attributes(message))
+
+    def library_import(self, library, importer):
+        self._library_import(library.name, {'args': list(importer.args),
+                                            'originalname': library.real_name,
+                                            'source': str(library.source or ''),
+                                            'importer': str(importer.source)})
+
+    def resource_import(self, resource, importer):
+        self._resource_import(resource.name, {'source': str(resource.source),
+                                              'importer': str(importer.source)})
+
+    def variables_import(self, attrs: dict, importer):
+        self._variables_import(attrs['name'], {'args': list(attrs['args']),
+                                               'source': str(attrs['source']),
+                                               'importer': str(importer.source)})
 
     def output_file(self, path: Path):
         self._output_file(str(path))
@@ -722,21 +567,15 @@ class ListenerV2Facade(ListenerFacade):
 
 
 class ListenerMethod:
-    # Flag to avoid recursive listener calls.
-    called = False
 
     def __init__(self, method, name):
         self.method = method
         self.listener_name = name
 
     def __call__(self, *args):
-        if self.method is None:
-            return
-        if self.called:
-            return
         try:
-            ListenerMethod.called = True
-            self.method(*args)
+            if self.method is not None:
+                self.method(*args)
         except TimeoutError:
             # Propagate possible timeouts:
             # https://github.com/robotframework/robotframework/issues/2763
@@ -746,8 +585,6 @@ class ListenerMethod:
             LOGGER.error(f"Calling method '{self.method.__name__}' of listener "
                          f"'{self.listener_name}' failed: {message}")
             LOGGER.info(f"Details:\n{details}")
-        finally:
-            ListenerMethod.called = False
 
     def __bool__(self):
         return self.method is not None

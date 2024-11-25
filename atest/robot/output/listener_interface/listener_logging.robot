@@ -10,10 +10,10 @@ Logging from listener does not break output file
 All start and end methods can log warnings to execution errors
     Correct warnings should be shown in execution errors
 
-Methods inside start_keyword and end_keyword can log normal messages
+Methods under tests can log normal messages
     Correct messages should be logged to normal log
 
-Methods outside start_keyword and end_keyword can log messages to syslog
+Methods outside tests can log messages to syslog
     Correct messages should be logged to syslog
 
 *** Keywords ***
@@ -49,6 +49,8 @@ Correct start/end warnings should be shown in execution errors
     ...    @{setup}
     ...    start_test
     ...    @{uk}
+    ...    start keyword    start keyword    end keyword    end keyword
+    ...    @{kw}
     ...    end_test
     ...    start_test
     ...    @{uk}
@@ -71,10 +73,18 @@ Get start/end messages
 Correct messages should be logged to normal log
     'My Keyword' has correct messages    ${SUITE.setup}    Suite Setup
     ${tc} =    Check Test Case    Pass
-    'My Keyword' has correct messages    ${tc.kws[0]}    Pass
+    Check Log Message    ${tc.body[0]}   start_test    INFO
+    Check Log Message    ${tc.body[1]}   start_test    WARN
+    'My Keyword' has correct messages    ${tc.body[2]}    Pass
+    Check Log Message    ${tc.body[5]}   end_test    INFO
+    Check Log Message    ${tc.body[6]}   end_test    WARN
     ${tc} =    Check Test Case    Fail
-    'My Keyword' has correct messages    ${tc.kws[0]}    Fail
-    'Fail' has correct messages    ${tc.kws[1]}
+    Check Log Message    ${tc.body[0]}   start_test    INFO
+    Check Log Message    ${tc.body[1]}   start_test    WARN
+    'My Keyword' has correct messages    ${tc.body[2]}    Fail
+    'Fail' has correct messages    ${tc.body[3]}
+    Check Log Message    ${tc.body[4]}   end_test    INFO
+    Check Log Message    ${tc.body[5]}   end_test    WARN
 
 'My Keyword' has correct messages
     [Arguments]    ${kw}    ${name}
@@ -105,8 +115,11 @@ Correct messages should be logged to normal log
     Check Log Message    ${kw.body[4].body[6]}    end keyword      WARN
     Check Log Message    ${kw.body[5].body[0]}    start var        INFO
     Check Log Message    ${kw.body[5].body[1]}    start var        WARN
-    Check Log Message    ${kw.body[5].body[2]}    end var          INFO
-    Check Log Message    ${kw.body[5].body[3]}    end var          WARN
+    Check Log Message    ${kw.body[5].body[2]}    log_message: INFO \${expected} = JUST TESTING...    INFO
+    Check Log Message    ${kw.body[5].body[3]}    log_message: INFO \${expected} = JUST TESTING...    WARN
+    Check Log Message    ${kw.body[5].body[4]}    \${expected} = JUST TESTING...    INFO
+    Check Log Message    ${kw.body[5].body[5]}    end var          INFO
+    Check Log Message    ${kw.body[5].body[6]}    end var          WARN
     Check Log Message    ${kw.body[6].body[0]}    start keyword    INFO
     Check Log Message    ${kw.body[6].body[1]}    start keyword    WARN
     Check Log Message    ${kw.body[6].body[2]}    end keyword      INFO
@@ -133,8 +146,6 @@ Correct messages should be logged to syslog
     ...    message: INFO Robot Framework
     ...    start_suite
     ...    end_suite
-    ...    start_test
-    ...    end_test
     ...    output_file
     ...    log_file
     ...    report_file

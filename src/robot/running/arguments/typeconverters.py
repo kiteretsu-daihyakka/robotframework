@@ -51,7 +51,18 @@ class TypeConverter:
                  languages: 'Languages|None' = None):
         self.type_info = type_info
         self.custom_converters = custom_converters
-        self.languages = languages or Languages()
+        self.languages = languages
+
+    @property
+    def languages(self) -> Languages:
+        # Initialize only when needed to save time especially with Libdoc.
+        if self._languages is None:
+            self._languages = Languages()
+        return self._languages
+
+    @languages.setter
+    def languages(self, languages: 'Languages|None'):
+        self._languages = languages
 
     @classmethod
     def register(cls, converter: 'type[TypeConverter]') -> 'type[TypeConverter]':
@@ -526,7 +537,17 @@ class TypedDictConverter(TypeConverter):
         return type_info.is_typed_dict
 
     def no_conversion_needed(self, value):
-        return False
+        if not isinstance(value, Mapping):
+            return False
+        for key in value:
+            try:
+                converter = self.converters[key]
+            except KeyError:
+                return False
+            else:
+                if not converter.no_conversion_needed(value[key]):
+                    return False
+        return set(value).issuperset(self.type_info.required)
 
     def _non_string_convert(self, value):
         return self._convert_items(value)

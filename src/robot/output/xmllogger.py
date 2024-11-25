@@ -30,6 +30,9 @@ class XmlLoggerAdapter(LoggerApi):
         logger = XmlLogger if not legacy_output else LegacyXmlLogger
         self.logger = logger(path, log_level, rpa, generator)
 
+    def is_logged(self, message):
+        return self.logger.is_logged(message)
+
     @property
     def flatten_level(self):
         return self.logger.flatten_level
@@ -155,6 +158,10 @@ class XmlLogger(ResultVisitor):
         self.flatten_level = 0
         self._errors = []
 
+    def is_logged(self, msg):
+        # `message` can be set to None by listeners to get it discarded.
+        return self._log_message_is_logged(msg.level) and msg.message is not None
+
     def _get_writer(self, output, rpa, generator, suite_only):
         if not output:
             return NullMarkupWriter()
@@ -186,7 +193,7 @@ class XmlLogger(ResultVisitor):
             self._errors.append(msg)
 
     def log_message(self, msg):
-        if self._log_message_is_logged(msg.level):
+        if self.is_logged(msg):
             self._write_message(msg)
 
     def _write_message(self, msg):
@@ -194,7 +201,7 @@ class XmlLogger(ResultVisitor):
                  'level': msg.level}
         if msg.html:
             attrs['html'] = 'true'
-        # Use `_xml_writer`, not `_writer` to write messages also when flattening.
+        # Use `_xml_writer`, not `_writer`, to write messages also when flattening.
         self._xml_writer.element('msg', msg.message, attrs)
 
     def start_keyword(self, kw):
@@ -217,7 +224,7 @@ class XmlLogger(ResultVisitor):
             if self.flatten_level == 0:
                 self._writer = self._xml_writer
         self._write_list('var', kw.assign)
-        self._write_list('arg', kw.args)
+        self._write_list('arg', [str(a) for a in kw.args])
         self._write_list('tag', kw.tags)
         self._writer.element('doc', kw.doc)
         if kw.timeout:
@@ -429,6 +436,8 @@ class LegacyXmlLogger(XmlLogger):
                 'schemaversion': '4'}
 
     def _datetime_to_timestamp(self, dt):
+        if dt is None:
+            return None
         return dt.isoformat(' ', timespec='milliseconds').replace('-', '')
 
     def _get_start_keyword_attrs(self, kw):
